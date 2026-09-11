@@ -32,6 +32,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# GPU backend for warp-lang (pick one; they conflict), mirroring the torch-cu12/cu13 pattern:
+cuda = ["warp-lang>=1.17.0"]   # NVIDIA CUDA wheel via the nvidia index (upstream default path)
+rocm = []                       # AMD ROCm: install AMD-Ecosystem/warp (built from source); warp-lang not pinned to the CUDA-only wheel
+
 
 # Core simulation dependencies
 sim = [
@@ -156,6 +160,7 @@ explicit = true
 
 [tool.uv]
 conflicts = [
+    [{ extra = "cuda" }, { extra = "rocm" }],
     [
         { extra = "torch-cu12" },
         { extra = "torch-cu13" },
@@ -163,7 +168,9 @@ conflicts = [
 ]
 
 [tool.uv.sources]
-warp-lang = { index = "nvidia" }
+# warp-lang uses the NVIDIA CUDA wheel index only under the `cuda` extra; under `rocm` it is
+# provided by AMD-Ecosystem/warp built from source (see the ROCm install docs).
+warp-lang = { index = "nvidia", extra = "cuda" }
 torch = [
     { index = "pytorch-cu128", extra = "torch-cu12" },
     { index = "pytorch-cu130", extra = "torch-cu13" },
